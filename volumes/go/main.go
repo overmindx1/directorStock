@@ -4,15 +4,13 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/overmind/go_test/controller"
+	"github.com/overmind/go_test/middlewares"
 	"github.com/overmind/go_test/rootVar"
 	"github.com/overmind/go_test/task"
-	limit "github.com/yangxikun/gin-limit-by-key"
-	"golang.org/x/time/rate"
 )
 
 func main() {
@@ -25,27 +23,15 @@ func main() {
 
 	r := gin.Default()
 
-	// //判斷Domain
-	// r.Use(func(c *gin.Context) {
-	// 	if strings.Index(c.Request.Host, "stock.hapopo.com") == -1 {
-	// 		c.AbortWithStatus(401)
-	// 	}
-	// 	c.Next()
-	// })
+	//判斷Domain
+	domains := []string{"stock.hapopo.com", "localhost"}
+	r.Use(middlewares.AllowDomains(domains))
 
 	// 限制每個人的讀取量
-	r.Use(limit.NewRateLimiter(func(c *gin.Context) string {
-		return c.ClientIP() // limit rate by client ip
-	}, func(c *gin.Context) (*rate.Limiter, time.Duration) {
-		return rate.NewLimiter(rate.Every(100*time.Millisecond), 5), time.Hour // limit 5 qps/clientIp and permit bursts of at most 5 tokens, and the limiter liveness time duration is 1 hour
-	}, func(c *gin.Context) {
-		c.AbortWithStatus(429) // handle exceed rate limit request
-	}))
+	r.Use(middlewares.SetRequestLimit())
 
 	//壓縮Response
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
-
-	//寫Log
 
 	r.LoadHTMLFiles("view/index.html")
 	r.Static("/css", "view/css")
@@ -54,7 +40,6 @@ func main() {
 	r.StaticFile("/favicon.ico", "view/favicon.ico")
 	// index
 	r.GET("/", func(c *gin.Context) {
-
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
 

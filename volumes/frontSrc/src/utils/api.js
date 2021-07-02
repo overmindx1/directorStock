@@ -91,10 +91,11 @@ export async function sendMmeberSpreadsheet(data){
                 let beforeValueDisc = beforeBuyFee * parseFloat(item.MemberData.MemFeeDiscount);
                 beforeBuyFee = beforeValueDisc > parseInt(item.MemberData.MemLowestFee) ? parseFloat(beforeValueDisc.toFixed(2)) : parseInt(item.MemberData.MemLowestFee);                
                 let saleTax = parseFloat( (nowValue * 0.003).toFixed(2) ) //證交稅
-                //這支股票收益
+                // 這支股票收益
                 let Profit = nowValue - beforeValue - (nowSaleFee + beforeBuyFee + saleTax);
                 item.MemberData.Profit = parseFloat( Profit.toFixed(2) );
-                
+                // 這支股票投資額
+                item.MemberData.CostValue = parseInt(beforeValue)
             }
             item.MemberData.CompareIsUp = closePrice > item.MemberData.MemAvgCost ? true : false
             

@@ -8,14 +8,18 @@
                             <el-input v-model="form.spreadsheed" placeholder="" />
                         </el-col>
                         <el-col :xs="7" :sm="7" :md="5" :lg="4" :xl="3">
-                            <el-dropdown split-button type="primary"  @click="sendMss" @command="btnDropListCommand" size="mini">
+                            <el-dropdown split-button type="primary"  @click="sendMss" @command="btnDropListCommand" size="small">
                                 送出
                                 <el-dropdown-menu slot="dropdown">
                                     <el-dropdown-item command="saveSheetUrl">記住表單資料</el-dropdown-item>
                                     <el-dropdown-item command="clearSheetUrl" divided>清除已儲存資料</el-dropdown-item>
+                                    <el-dropdown-item command="showColumeSetting" divided>
+                                        表格欄位設定
+                                    </el-dropdown-item>
                                     <el-dropdown-item command="showStatic" divided>
                                         {{ staticTrigger == true ? '關閉' : '顯示' }}統計資料
                                     </el-dropdown-item>
+                                    
                                 </el-dropdown-menu>
                             </el-dropdown>
                             <!-- <el-button>送出</el-button> -->
@@ -63,7 +67,7 @@
                         </el-col>
                     </el-form-item>
                 </el-form>
-                <stock-table :tableData="tableData"></stock-table>
+                <stock-table :tableData="tableData" :tableColumes="tableColumes"></stock-table>
             </el-col>
         </el-row>
 
@@ -79,12 +83,18 @@
                 </el-alert>
             </el-col>
         </el-row>
+
+        <!-- 設定要顯示的欄位 -->
+        <table-enable-columes :tableColumes="tableColumes" :triggerColumeSetting="triggerColumeSetting" 
+         @saveColumesShow="saveColumesShow" @closeDialog="triggerColumeSetting = false"></table-enable-columes>
     </div>
 </template>
 
 <script>
 import{ getDirectorSelection , sendMmeberSpreadsheet} from '@/utils/api'
 import StockTable from '@/components/stockTable'
+import TableEnableColumes from '@/components/tableEnableColumes'
+import tableColumes from '@/utils/tableColumes'
 const DEFAULT_STATIC = {
     director : {
         stockCount : 0 ,
@@ -101,16 +111,18 @@ const DEFAULT_STATIC = {
 }
 export default {
     name: "App",
+    components : {StockTable , TableEnableColumes},
     data : () => ({
         form : {
             spreadsheed : "",
             stockId : ""
         },
+        tableColumes : tableColumes,
+        triggerColumeSetting : false,
         staticTrigger : false,
         statics : JSON.parse(JSON.stringify(DEFAULT_STATIC)),
         rawData : []
     }),
-    components : {StockTable},
     watch : {
         rawData(newVal , oldVal) {
             //計算統計資料
@@ -159,7 +171,8 @@ export default {
             const find = this.rawData.find( item => {
                 return item.StockId == this.form.stockId
             })
-            return [find]
+
+            return find == undefined ? [] : [find]
         }
     },
     methods : {
@@ -188,15 +201,26 @@ export default {
                 localStorage.clear()
                 this.$message("已清除您的資料");
             }
+            if(command == 'showColumeSetting') {
+                this.triggerColumeSetting = true;
+            }
             if(command == 'showStatic') {
                 this.staticTrigger = !this.staticTrigger
             }
+        },
+        // 存下已修改的顯示欄位
+        saveColumesShow(obj) {
+            this.tableColumes = JSON.parse(JSON.stringify(obj));
+            location.reload();
         }
     },
     mounted() {
         this.GDS();
         if(localStorage.getItem('googleSheetUrl') !== null ) {
             this.form.spreadsheed = localStorage.getItem('googleSheetUrl');
+        }
+        if(localStorage.getItem('tableColumes') !== null) {
+            this.tableColumes = JSON.parse(localStorage.getItem('tableColumes'))
         }
     }
 };

@@ -14,7 +14,16 @@ func InitTask() {
 
 	//每天抓取TWSE檔案 Parse
 	cron.Every(1).Days().At("14:30").Do(ParseCSV)
+
+	cron.Every(1).Days().At("17:30").Do(ParseCSV)
+
+	cron.Every(1).Days().At("20:30").Do(ParseCSV)
+
 	cron.Every(1).Days().At("15:05").Do(ParseTpexCSV)
+
+	cron.Every(1).Days().At("18:05").Do(ParseTpexCSV)
+
+	cron.Every(1).Days().At("21:05").Do(ParseTpexCSV)
 
 	// 開始工作排程
 	cron.StartAsync()
