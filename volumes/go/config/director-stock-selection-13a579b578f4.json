@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "director-stock-selection",
+  "private_key_id": "13a579b578f4703f33567f218e26ef185a81275b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDiIkHamK0fbOAw\nYNlyiwI8dUPvWg5RuyzhLn9xOuXNr/DgmKdJPaVvq/yq9pfKkjC823rLD7oLK7Wa\nZ7XzIurBF18UAn89+hBlueB06CScHsKE0D+OOrfFnTEW4p3pcBGWevdlVy2APyWd\nl/uYNlXo5/qhrEaPaMYMpNqtioZfVA/FsHBCqBGMIv2Z/EEdipTuLqfzh8lhqx6t\npfyxqlDm0uSOm4OSX7ilc2SrBPVGvkf39PcLWTH09a/MwijziE/9obCpQwgJe/T4\nT7Fu6efDfUeqoOd14dgzhBHIqklLVb7fR9Pruw09snUXrzRWLeOZG1ICE4bSm8WD\nkL5yzRE1AgMBAAECggEAGiscs883OYu/5dlPUJIFkDmBwxEI1yxx5R0cYl4Oed8C\nYPtJYJBhtKqScrZWmnqQaUp8y0LmpKRKP7QAukIwKGgr+ITRdLqbayo3b0/t7KMi\nn3v53tusqJGoPJ286GavolpYhsGv4kdscvBDjTm8d1dhCZSGFdJqGMx7Adol8qHw\nAYfh5b6mRGkBubPIYjCOLAyQxgQV4EBtrXojFkMXAECI06F0HWQSU0s1wUpecERM\nXXmb8N3CmQ/D6ML1wXaXDSyrP+l1P7PGGTu6X2wJOojxcLuzj4wB2OnIvV291MkK\nWpuBAZCzVJRkVAyuLiQjZcTAMI2KMZinNbAFannwAQKBgQDwpPplRyVu3vyMOc/u\nECLEzCt2zo1W8B8syLqncxm4G0939Rb+JiXsPL/eDqoNl2olhYtKU/5CXmHFHtMS\ny2+VoTJSmIAFsSYssxZWBfI2AhRjnyBQdqaAcn5b9TkQxrzDr6Yn4NjQbBalrmrh\nBT84k4sIdFOif+jh3XsLoSg71QKBgQDwkD4HSC8Olwf9tMfMXqgSI0UwhGjDT078\nOf0jAMll6gs4EiZI+OlV4cNsQ8buWNKgxE3QAhl3/9CCJ8LZhJMKKp8mjVzCTk8b\nARycYkUsrEXr0c9MFe4QS/ixQ4+gq0BvuJ1/2sI1FFGEmDheSunBXvFNJ8ARuCN4\nOl0nqbMP4QKBgCMKcueid4HweGfW1z88HEP50u5m30/kgTWdOQi/CuSzHVxDVQjG\n90iyA+JK0lpOTQePrZuyJVj2s1fnyCZ5dxMbuN8sE6BAjmV94me+T+mrXdqvxh3R\nWSdlBJ9RUvDtb3kzL4epBwk6ZAXWIvwHLpCHc3xUrAUCiR+yh4NHATvNAoGBAPBo\nxoSSf+yNxT+n5jB4vHB77Q6ClQvy+1WYQkEz7RG7pwCfKsGsd8wLNjjBN1JFVCG0\nbKsfHgLNlbwtLk4hbq0vUSO/DF9m0SmEn+otT0JI3AvC/u7jz6lbsyq8ARKpclj0\nX/pBTeqr5pejZFnfdeJ5Fp9rxUgwBMqHUUdtEXUhAoGBAICeo2UN4L1DSXKF/Tng\nASrmsxe6F2ccftugE7afyPSLE1CQXIaJ32iLR2lfcHdQJ0dLTa25gnPOV5DdB2i4\nCNnloRT74LmIZ8a4ZVJXMFf5/Hid+KOjQPjzYuy6XVvCzSETBUHaI9o3fzpIz9n4\nKh5Kt92kMvJo0e2RzsF35PSM\n-----END PRIVATE KEY-----\n",
+  "client_email": "director-stock-selection@director-stock-selection.iam.gserviceaccount.com",
+  "client_id": "101649144427828147910",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/director-stock-selection%40director-stock-selection.iam.gserviceaccount.com"
+}

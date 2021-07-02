@@ -1,0 +1,35 @@
+version: '2'
+services:
+    # host:
+    #     image: ubuntu:latest
+    #     tty: true
+    #     volumes:     
+    #         - ./volumes/dist:/home/go 
+    #     command : " /bin/sh "
+    #     working_dir : /home/go
+    #     ports:
+    #         - 9527:9527
+    #         # - 8080:8080 
+    #     links:
+    #         - mariaDb 
+    golang:
+        image: golang:latest
+        volumes:     
+            - ./volumes/go:/home/go 
+        command : "go run main.go"
+        working_dir : /home/go
+        ports:
+            - 9527:9527
+            # - 8080:8080 
+        links:
+            - mariaDb  
+    mariaDb:
+        image: mariadb:10.5
+        environment:
+            MARIADB_ROOT_PASSWORD : "34erDFcv"
+            MARIADB_ROOT_HOST : "%"
+            TZ : "Asia/Taipei"
+        ports:
+            - 3310:3306 
+        volumes:            
+            - ./volumes/mysql:/var/lib/mysql
