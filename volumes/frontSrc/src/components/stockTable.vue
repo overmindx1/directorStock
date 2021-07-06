@@ -98,7 +98,7 @@
             <template slot-scope="scope">
                 <span v-if="scope.row.MemberData !== null">
                     <div class="directorPercent" :class="{redBg : scope.row.MemberData.CompareIsUp , greenBg : !scope.row.MemberData.CompareIsUp}">
-                        {{scope.row.MemberData.Percent}}
+                        {{scope.row.MemberData.Percent == "-" ? "-" : `${scope.row.MemberData.Percent} %`}}
                     </div>
                 </span>
                 <span v-else>  </span>
@@ -117,7 +117,7 @@
            <template slot-scope="scope">
                <span v-if="scope.row.DirectorSelection !== null">
                     <div class="directorPercent" :class="{redBg : scope.row.DirectorSelection.CompareIsUp , greenBg : !scope.row.DirectorSelection.CompareIsUp}">
-                        {{scope.row.DirectorSelection.Percent}}
+                        {{scope.row.DirectorSelection.Percent == "-" ? "-" : `${scope.row.DirectorSelection.Percent} %`}}
                     </div>
                 </span>
                 <span v-else>  </span>                           
@@ -157,15 +157,15 @@ export default {
             required : true
         }
     },
-    filters : {
-        // 增加千分位
-        digital3comma(number){
-            if(number == undefined) {
-                return ''
-            } 
-            number.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
-        }
-    },
+    // filters : {
+    //     // 增加千分位
+    //     digital3comma(number){
+    //         if(number == undefined) {
+    //             return ''
+    //         } 
+    //         number.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
+    //     }
+    // },
     methods : {
         sortPercentDirector(a , b ) {
             

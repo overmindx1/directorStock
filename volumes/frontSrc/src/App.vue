@@ -8,7 +8,7 @@
                             <el-input v-model="form.spreadsheed" placeholder="" />
                         </el-col>
                         <el-col :xs="7" :sm="7" :md="5" :lg="4" :xl="3">
-                            <el-dropdown split-button type="primary"  @click="sendMss" @command="btnDropListCommand" size="small">
+                            <el-dropdown trigger="click" split-button type="primary"  @click="sendMss" @command="btnDropListCommand" size="small">
                                 送出
                                 <el-dropdown-menu slot="dropdown">
                                     <el-dropdown-item command="saveSheetUrl">記住表單資料</el-dropdown-item>
@@ -60,10 +60,21 @@
 
         <el-row type="flex" justify="center" align="top" >
             <el-col :xs="22" :sm="22" :md="22" :lg="22" :xl="22">
-                <el-form  :model="form" size="small" label-width="5rem">
-                    <el-form-item label="股號搜尋">
-                        <el-col :xs="22" :sm="8" :md="6" :lg="3" :xl="2" style="font-size:1rem">
-                            <el-input v-model="form.stockId"></el-input>
+                <el-form  :model="form" size="small"  >
+                    <el-form-item label="">
+                        <el-col :xs="9" :sm="4" :md="4" :lg="3" :xl="2" style="font-size:1rem;text-align:left">
+                            <el-dropdown trigger="click"  @command="changeSearchType">
+                                <el-button split-button type="primary">
+                                    {{tableSearchLable}} : <i class="el-icon-arrow-down el-icon--right"></i>
+                                </el-button>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item command="stockId" >股號搜尋</el-dropdown-item>
+                                    <el-dropdown-item command="stockName" divided>股名搜尋</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+                        </el-col>
+                        <el-col :xs="14" :sm="8" :md="6" :lg="3" :xl="3" style="font-size:1rem">
+                            <el-input v-model="form.stockSearch"></el-input>
                         </el-col>
                     </el-form-item>
                 </el-form>
@@ -115,7 +126,8 @@ export default {
     data : () => ({
         form : {
             spreadsheed : "",
-            stockId : ""
+            stockSearch : "",
+            searchType : "stockId" // stockId 股號搜索 stockName 股名搜索
         },
         tableColumes : tableColumes,
         triggerColumeSetting : false,
@@ -165,14 +177,35 @@ export default {
     },
     computed : {
         tableData(){
-            if(this.form.stockId == "" || this.form.stockId.length < 4) {
-                return this.rawData
-            } 
-            const find = this.rawData.find( item => {
-                return item.StockId == this.form.stockId
-            })
+            let find = []
+            if(this.form.searchType == "stockId") {
+                if(this.form.stockSearch == "" || this.form.stockSearch.length < 2) {
+                    return this.rawData
+                } 
+                find = this.rawData.filter( item => {
+                    if(item.StockId.indexOf(this.form.stockSearch) == 0) {
+                        return item
+                    }
+                }) 
+            } else {
+                if(this.form.stockSearch == "" || this.form.stockSearch.length < 2) {
+                    return this.rawData
+                } 
+                find = this.rawData.filter( item => {
+                    if(item.StockName.indexOf(this.form.stockSearch) != -1) {
+                        return item
+                    }
+                }) 
+            }
 
-            return find == undefined ? [] : [find]
+            return find;
+        },
+        tableSearchLable () {
+            if(this.form.searchType == "stockId") {
+                return "股號搜尋";
+            } else {
+                return "股名搜尋";
+            }
         }
     },
     methods : {
@@ -208,10 +241,14 @@ export default {
                 this.staticTrigger = !this.staticTrigger
             }
         },
+        changeSearchType(command){
+            console.log(command)
+            this.form.searchType = command
+        },
         // 存下已修改的顯示欄位
         saveColumesShow(obj) {
             this.tableColumes = JSON.parse(JSON.stringify(obj));
-            location.reload();
+            window.location.reload();
         }
     },
     mounted() {

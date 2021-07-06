@@ -75,7 +75,7 @@ export default {
         // 刪除儲存資料
         resetColumeSetting(){
             localStorage.removeItem('tableColumes')
-            location.reload();
+            window.location.reload();
         }
     },
     mounted(){
