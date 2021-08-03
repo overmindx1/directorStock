@@ -20,6 +20,8 @@ services:
         working_dir : /home/go
         ports:
             - 9527:9527
+            - 80:80
+            - 443:443
             # - 8080:8080 
         links:
             - mariaDb  

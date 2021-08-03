@@ -37,7 +37,10 @@ func main() {
 	r.Static("/css", "view/css")
 	r.Static("/js", "view/js")
 	r.Static("/fonts", "view/fonts")
+	r.Static("/icons", "view/icons")
 	r.StaticFile("/favicon.ico", "view/favicon.ico")
+	r.StaticFile("/sw.js", "view/sw.js")
+	r.StaticFile("/manifest.json", "view/manifest.json")
 	// index
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
@@ -52,6 +55,11 @@ func main() {
 	// 開始排程工作
 	task.InitTask()
 
-	r.Run(":9527") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	// ACME Server - For CertBot
+	//ACME := gin.Default()
+	//ACME.GET("/.well-known/acme-challenge/:acmename", controller.AcmeHandle)
+	//go ACME.Run(":80")
 
+	go r.Run(":9527") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.RunTLS(":443", "./ssl/fullchain1.pem", "./ssl/privkey1.pem")
 }

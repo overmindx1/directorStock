@@ -55,6 +55,7 @@ export async function sendMmeberSpreadsheet(data){
                 item.DirectorSelection.AvgCost = directorAvgPrice
                 item.DirectorSelection.CompareIsUp = closePrice > directorAvgPrice ? true : false
                 if(isNaN(closePrice)) {
+                    closePrice = 0
                     item.ClosePrice = 0
                     item.DirectorSelection.Percent = 0
                 } else {
@@ -67,6 +68,7 @@ export async function sendMmeberSpreadsheet(data){
             }
         }
 
+        
         
         if(item.MemberData !== null) {
             // 看一下平均成本是否正常
@@ -92,7 +94,11 @@ export async function sendMmeberSpreadsheet(data){
                 beforeBuyFee = beforeValueDisc > parseInt(item.MemberData.MemLowestFee) ? parseFloat(beforeValueDisc.toFixed(2)) : parseInt(item.MemberData.MemLowestFee);                
                 let saleTax = parseFloat( (nowValue * 0.003).toFixed(2) ) //證交稅
                 // 這支股票收益
+                
                 let Profit = nowValue - beforeValue - (nowSaleFee + beforeBuyFee + saleTax);
+                if(item.StockId == "912398") {
+                    console.log({item ,Profit , nowValue , beforeValue ,  nowSaleFee , beforeBuyFee , saleTax , closePrice});
+                }
                 item.MemberData.Profit = parseFloat( Profit.toFixed(2) );
                 // 這支股票投資額
                 item.MemberData.CostValue = parseInt(beforeValue)

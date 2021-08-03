@@ -19,7 +19,9 @@
                                     <el-dropdown-item command="showStatic" divided>
                                         {{ staticTrigger == true ? '關閉' : '顯示' }}統計資料
                                     </el-dropdown-item>
-                                    
+                                    <el-dropdown-item command="wishList" divided>
+                                        功能願望
+                                    </el-dropdown-item>
                                 </el-dropdown-menu>
                             </el-dropdown>
                             <!-- <el-button>送出</el-button> -->
@@ -167,7 +169,7 @@ export default {
                     this.statics.member.totalInvestment = this.statics.member.totalInvestment + memberCost
                     this.statics.member.totalNowValue = this.statics.member.totalNowValue + memberValue
                     memberProfit = memberProfit + item.MemberData.Profit;
-                    
+                    // console.log([memberProfit , item])
                 }
             });
 
@@ -239,6 +241,9 @@ export default {
             }
             if(command == 'showStatic') {
                 this.staticTrigger = !this.staticTrigger
+            }
+            if(command == 'wishList') {
+                window.open("https://forms.gle/4zPrpWXsSxSohusHA")
             }
         },
         changeSearchType(command){
@@ -315,6 +320,9 @@ body , html {
     height: 0px;
     transition: all ease-out .3s;
     overflow: hidden;
+    @media (max-width:400px) {
+        font-size: 0.9rem;
+    }
 }
 .staticClassOpen {
     height : 16.5rem
