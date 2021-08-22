@@ -4,11 +4,15 @@
             <el-col :xs="22" :sm="22" :md="18" :lg="12" :xl="10">
                 <el-form  :model="form" size="small" class="sheetForm">                    
                     <el-form-item label="表單">
-                        <el-col :xs="13" :sm="13" :md="17" :lg="16" :xl="12">
-                            <el-input v-model="form.spreadsheed" placeholder="" />
+                        <el-col :xs="11" :sm="12" :md="15" :lg="16" :xl="12">
+                            <el-input v-model="currentUserData.userData.googleSpreadsheet" placeholder="" />
                         </el-col>
-                        <el-col :xs="7" :sm="7" :md="5" :lg="4" :xl="3">
-                            <el-dropdown trigger="click" split-button type="primary"  @click="sendMss" @command="btnDropListCommand" size="small">
+                        <el-col :xs="10" :sm="9" :md="7" :lg="5" :xl="5">
+                            <el-button-group>
+                                <el-button size="mini" type="primary" @click="sendMss">送出</el-button>
+                                <el-button size="mini" type="primary" @click="drawerTrigger = true">選單</el-button>
+                            </el-button-group>
+                            <!-- <el-dropdown trigger="click" split-button type="primary"  @click="sendMss" @command="btnDropListCommand" size="small">
                                 送出
                                 <el-dropdown-menu slot="dropdown">
                                     <el-dropdown-item command="saveSheetUrl">記住表單資料</el-dropdown-item>
@@ -23,7 +27,7 @@
                                         功能願望
                                     </el-dropdown-item>
                                 </el-dropdown-menu>
-                            </el-dropdown>
+                            </el-dropdown> -->
                             <!-- <el-button>送出</el-button> -->
                         </el-col>
                     </el-form-item> 
@@ -80,7 +84,8 @@
                         </el-col>
                     </el-form-item>
                 </el-form>
-                <stock-table :tableData="tableData" :tableColumes="tableColumes"></stock-table>
+                <stock-tablevxe :tableData="tableData" :tableColumes="currentUserData.userData.tableColumes"></stock-tablevxe>
+                <!-- <stock-table :tableData="tableData" :tableColumes="tableColumes"></stock-table> -->
             </el-col>
         </el-row>
 
@@ -98,16 +103,29 @@
         </el-row>
 
         <!-- 設定要顯示的欄位 -->
-        <table-enable-columes :tableColumes="tableColumes" :triggerColumeSetting="triggerColumeSetting" 
+        <table-enable-columes :tableColumes="currentUserData.userData.tableColumes" :triggerColumeSetting="triggerColumeSetting" 
          @saveColumesShow="saveColumesShow" @closeDialog="triggerColumeSetting = false"></table-enable-columes>
+
+        <!-- 使用者相關 -->
+        <change-user :dbInstance="dbInstance" :currentUserData="currentUserData" :userConfigTaigger="userConfigTaigger"
+            @closeDialog="userConfigTaigger = false" @changeCurrentUser="changeCurrentUser"
+        ></change-user>
+
+        <!-- 抽屜 -->
+        <drawer-menu :drawerTrigger="drawerTrigger" :currentUserData="currentUserData"
+         @saveUserData="saveUserData" @closedDrawer="closedDrawer" @openFromDrawer="openFromDrawer"></drawer-menu>
     </div>
 </template>
 
 <script>
 import{ getDirectorSelection , sendMmeberSpreadsheet} from '@/utils/api'
 import StockTable from '@/components/stockTable'
+import StockTablevxe from '@/components/stockTablevxe'
 import TableEnableColumes from '@/components/tableEnableColumes'
-import tableColumes from '@/utils/tableColumes'
+import ChangeUser from '@/components/changeUser'
+import DrawerMenu from '@/components/drawerMenu'
+import DefaultTableColumes  from '@/utils/tableColumes'
+import dbInstance from '@/utils/indexedDbWarp'
 const DEFAULT_STATIC = {
     director : {
         stockCount : 0 ,
@@ -124,18 +142,31 @@ const DEFAULT_STATIC = {
 }
 export default {
     name: "App",
-    components : {StockTable , TableEnableColumes},
+    components : {StockTable , StockTablevxe , TableEnableColumes , ChangeUser , DrawerMenu} ,
     data : () => ({
         form : {
-            spreadsheed : "",
             stockSearch : "",
             searchType : "stockId" // stockId 股號搜索 stockName 股名搜索
         },
-        tableColumes : tableColumes,
-        triggerColumeSetting : false,
-        staticTrigger : false,
+        tableColumes : DefaultTableColumes, //欄位設定
+        triggerColumeSetting : false, //欄位設定開關
+        staticTrigger : false, //統計資料開關
+        userConfigTaigger :false, // 使用者相關
+        drawerTrigger : false, //測欄選單開關
+        
         statics : JSON.parse(JSON.stringify(DEFAULT_STATIC)),
-        rawData : []
+        rawData : [],
+        // 使用者資料
+        currentUserData : {
+            nickname : '',
+            userData : {
+                id : 0,
+                googleSpreadsheet : '',
+                tableColumes : DefaultTableColumes
+            }
+        },
+        getAllUser : [],
+        dbInstance : dbInstance
     }),
     watch : {
         rawData(newVal , oldVal) {
@@ -219,8 +250,8 @@ export default {
         },
         async sendMss(){
             //https://docs.google.com/spreadsheets/d/
-            if(this.form.spreadsheed.indexOf("https://docs.google.com/spreadsheets/d/") !== -1) {
-                let spreadsheetId = this.form.spreadsheed.split("/")[5]
+            if(this.currentUserData.userData.googleSpreadsheet.indexOf("https://docs.google.com/spreadsheets/d/") !== -1) {
+                let spreadsheetId = this.currentUserData.userData.googleSpreadsheet.split("/")[5]
                 let data = await sendMmeberSpreadsheet({spreadsheetId})
                 this.rawData = data;
             } else {
@@ -246,24 +277,76 @@ export default {
                 window.open("https://forms.gle/4zPrpWXsSxSohusHA")
             }
         },
-        changeSearchType(command){
-            console.log(command)
+        changeSearchType(command) {
             this.form.searchType = command
         },
         // 存下已修改的顯示欄位
         saveColumesShow(obj) {
-            this.tableColumes = JSON.parse(JSON.stringify(obj));
-            window.location.reload();
+            this.currentUserData.userData.tableColumes = JSON.parse(JSON.stringify(obj));
+        },
+        
+        // 儲存使用者資料
+        async saveUserData(){
+            let execute = await this.dbInstance.updateUserData(this.currentUserData.nickname , this.currentUserData.userData);
+            if(execute) {
+                this.$message(`使用者 ${this.currentUserData.nickname} 資料更新!`);
+                this.drawerTrigger = false;
+            } else {
+                this.$message({
+                    message: `使用者 ${this.currentUserData.nickname} 資料更新失敗!`,
+                    type: 'error'
+                });
+            }
+        },
+        // 單向資料流 更換使用者
+        async changeCurrentUser(row) {
+            let userData = await this.dbInstance.setDefaultUser(row.nickname);
+            if(userData) {
+                this.currentUserData.nickname = userData.nickname;
+                this.currentUserData.userData = userData;
+                if(Object.keys(this.currentUserData.userData.tableColumes).length == 0) {
+                    this.currentUserData.userData.tableColumes = DefaultTableColumes
+                }
+                this.$message(`更換使用者 ${row.nickname} 成功!`);
+                this.drawerTrigger = false;
+            } else {
+                this.$message({
+                    message: `更換使用者 ${row.nickname} 失敗!`,
+                    type: 'error'
+                });
+            }
+        },
+        // 
+        closedDrawer(){
+            this.drawerTrigger = false;
+        },
+        // 
+        openFromDrawer(trigger) {
+            if(trigger == "staticTrigger") {
+                this.staticTrigger = !this.staticTrigger
+            } else {
+                this[trigger] = true
+            }
         }
+
     },
-    mounted() {
+    async mounted() {
         this.GDS();
-        if(localStorage.getItem('googleSheetUrl') !== null ) {
-            this.form.spreadsheed = localStorage.getItem('googleSheetUrl');
-        }
-        if(localStorage.getItem('tableColumes') !== null) {
-            this.tableColumes = JSON.parse(localStorage.getItem('tableColumes'))
-        }
+        // if(localStorage.getItem('googleSheetUrl') !== null ) {
+        //     this.form.spreadsheed = localStorage.getItem('googleSheetUrl');
+        // }
+        // if(localStorage.getItem('tableColumes') !== null) {
+        //     this.tableColumes = JSON.parse(localStorage.getItem('tableColumes'))
+        // }
+        // 取得當前使用者資料 - 怕初始化來不及取得資料 , 延後取得
+        setTimeout(async() => {
+            let userData = await this.dbInstance.getDefaultUserData();
+            this.currentUserData.nickname = userData.nickname;
+            this.currentUserData.userData = userData;
+            if(Object.keys(this.currentUserData.userData.tableColumes).length == 0) {
+                this.currentUserData.userData.tableColumes = DefaultTableColumes
+            }
+        } , 1500); 
     }
 };
 </script>

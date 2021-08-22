@@ -9,8 +9,11 @@
   "dependencies": {
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "dexie": "^3.0.3",
     "element-ui": "^2.15.2",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vxe-table": "^3.3.11",
+    "xe-utils": "^3.3.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
