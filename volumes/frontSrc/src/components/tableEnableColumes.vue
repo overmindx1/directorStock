@@ -5,11 +5,20 @@
         :width="widthSet"
         :show-close="false"
     >
-        <el-row>
-            <el-col v-for="(item , key) in tableColumesTemp" :key="key" style="margin : .5rem 0">
-                {{item.label}} : <el-select v-model="item.show" filterable placeholder="请选择" size="small">
+        <el-row v-for="(item , key) in tableColumesTemp" :key="key" style="margin : .5rem 0;font-size:.8rem">
+            <el-col :span="5" style="line-height:2rem">
+                {{item.label}}:  
+            </el-col>
+            <el-col :span="7">
+                <el-select v-model="item.show"  placeholder="请选择" size="small">
                     <el-option label="顯示" :value="true">  </el-option>
                     <el-option label="不顯示" :value="false">  </el-option>
+                </el-select>
+            </el-col>
+            <el-col :span="6" style="line-height:2rem">顯示順序: </el-col>
+            <el-col :span="6">
+                <el-select v-model="item.index" filterable placeholder="请选择" size="small">
+                    <el-option v-for="n in 9" :key="n" :label="n" :value="n">  </el-option>
                 </el-select>
             </el-col>
         </el-row>
@@ -68,14 +77,14 @@ export default {
         },
         // 計入要顯示的表格欄位
         saveColumesShow(){
-            localStorage.setItem('tableColumes' , JSON.stringify(this.tableColumesTemp));
+            // localStorage.setItem('tableColumes' , JSON.stringify(this.tableColumesTemp));
             this.$emit('saveColumesShow' , this.tableColumesTemp);
             this.closeDialog();
         },
         // 刪除儲存資料
         resetColumeSetting(){
-            localStorage.removeItem('tableColumes')
-            window.location.reload();
+            // localStorage.removeItem('tableColumes')
+            this.$emit('resetColumeSetting' , this.tableColumesTemp);
         }
     },
     mounted(){

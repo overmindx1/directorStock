@@ -127,12 +127,14 @@ func ParseTpexCSV() {
 				stockItems.UpDown = check
 				stockItems.UpDownCount = record[3]
 				stockItems.Date = time.Now().Format("2006-01-02")
+				stockItems.StockType = "Tpex"
 				rootVar.DbConn.Save(&stockItems)
 			} else {
 
 				stockInsert := ModelSocket.StockItemsNoMem{
 					StockId:     record[0],
 					StockName:   record[1],
+					StockType:   "Tpex",
 					OpenPrice:   record[4],
 					ClosePrice:  record[2],
 					UpDown:      check,

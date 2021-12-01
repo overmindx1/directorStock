@@ -9,6 +9,9 @@ import (
 func InitTask() {
 	cron := gocron.NewScheduler(time.Local)
 
+	// 每天早上抓取每日股價更新股號
+	cron.Every(1).Days().At("08:30").Do(RealTimeStockWrite)
+
 	//每60分抓取會長股
 	cron.Every(60).Minutes().Do(GetDirectorStockSelection)
 

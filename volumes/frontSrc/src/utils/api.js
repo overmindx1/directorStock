@@ -11,6 +11,7 @@ export async function getDirectorSelection() {
         let closePrice = parseFloat(item.ClosePrice);
         let directorAvgPrice = parseFloat(item.DirectorSelection.AvgCost);
         item.ClosePrice = closePrice
+        item.SharesRatio = '-'
         if(isNaN(directorAvgPrice)) {
             directorAvgPrice = 0
             item.DirectorSelection.AvgCost = directorAvgPrice
@@ -97,7 +98,7 @@ export async function sendMmeberSpreadsheet(data){
                 
                 let Profit = nowValue - beforeValue - (nowSaleFee + beforeBuyFee + saleTax);
                 if(item.StockId == "912398") {
-                    console.log({item ,Profit , nowValue , beforeValue ,  nowSaleFee , beforeBuyFee , saleTax , closePrice});
+                    // console.log({item ,Profit , nowValue , beforeValue ,  nowSaleFee , beforeBuyFee , saleTax , closePrice});
                 }
                 item.MemberData.Profit = parseFloat( Profit.toFixed(2) );
                 // 這支股票投資額
@@ -110,6 +111,16 @@ export async function sendMmeberSpreadsheet(data){
                 Percent : "-"
             }
         }
+        // 存股比例
+        if(item.MemberData == null || item.MemberData.MemStockName == undefined || item.DirectorSelection.StockName == undefined) {
+            item.SharesRatio = '-';
+        } else {
+            let memberShare = item.MemberData.MemShares;
+            let directorShare = item.DirectorSelection.Shares;
+            directorShare = item.DirectorSelection.Shares.replace(',','');
+            item.SharesRatio = ((memberShare/directorShare) * 100).toFixed(2) + ' %'
+        }
+
     })
 
     return response

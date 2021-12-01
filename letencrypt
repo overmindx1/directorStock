@@ -1,3 +1,33 @@
+因為是手動的  所以不能用renew的方式  所以必須要重打指令
+ex : sudo certbot certonly --manual
+之前的執行 :
+[opc@instance-20210625-1348 directorStock]$ sudo certbot certonly --manual
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Plugins selected: Authenticator manual, Installer None
+Starting new HTTPS connection (1): acme-v02.api.letsencrypt.org
+Please enter in your domain name(s) (comma and/or space separated)  (Enter 'c'
+to cancel): stock.hapopo.com
+Cert is due for renewal, auto-renewing...
+Renewing an existing certificate for stock.hapopo.com
+Performing the following challenges:
+http-01 challenge for stock.hapopo.com
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Create a file containing just this data:
+
+KAqHp4GBGscyVrkpW5fefwH9DV37xPYdHDgF9zf44pA.NW7vp2syLk8vHn3Tt6GpQs9-M-wlEZg-GP-NlS65HTE
+
+And make it available on your web server at this URL:
+
+http://stock.hapopo.com/.well-known/acme-challenge/KAqHp4GBGscyVrkpW5fefwH9DV37xPYdHDgF9zf44pA
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Press Enter to Continue
+Waiting for verification...
+Cleaning up challenges
+
+
+
 IMPORTANT NOTES:
  - Congratulations! Your certificate and chain have been saved at:
    /etc/letsencrypt/live/stock.hapopo.com/fullchain.pem
@@ -11,3 +41,11 @@ IMPORTANT NOTES:
 
    Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
    Donating to EFF:                    https://eff.org/donate-le
+
+   Renewal with the manual plugin
+
+Certificates created using --manual do not support automatic renewal unless combined with an authentication hook script via --manual-auth-hook to automatically set up the required HTTP and/or TXT challenges.
+
+If you can use one of the other plugins which support autorenewal to create your certificate, doing so is highly recommended.
+
+To manually renew a certificate using --manual without hooks, repeat the same certbot --manual command you used to create the certificate originally. As this will require you to copy and paste new HTTP files or DNS TXT records, the command cannot be automated with a cron job.

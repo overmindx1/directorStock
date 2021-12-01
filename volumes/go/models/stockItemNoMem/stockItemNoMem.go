@@ -10,6 +10,7 @@ type StockItemsNoMem struct {
 	ID                uint
 	StockId           string
 	StockName         string
+	StockType         string
 	OpenPrice         string
 	ClosePrice        string
 	UpDown            string

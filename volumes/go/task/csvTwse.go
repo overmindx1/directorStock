@@ -95,11 +95,13 @@ func ParseCSV() {
 				stockItems.UpDown = record[9]
 				stockItems.UpDownCount = record[10]
 				stockItems.Date = time.Now().Format("2006-01-02")
+				stockItems.StockType = "Twse"
 				rootVar.DbConn.Save(&stockItems)
 			} else {
 				stockInsert := ModelSocket.StockItemsNoMem{
 					StockId:     record[0],
 					StockName:   record[1],
+					StockType:   "Twse",
 					OpenPrice:   record[5],
 					ClosePrice:  record[8],
 					UpDown:      record[9],

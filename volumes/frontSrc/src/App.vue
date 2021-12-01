@@ -84,7 +84,7 @@
                         </el-col>
                     </el-form-item>
                 </el-form>
-                <stock-tablevxe :tableData="tableData" :tableColumes="currentUserData.userData.tableColumes"></stock-tablevxe>
+                <stock-tablevxe ref="vxeTable" :tableData="tableData" :tableColumes="currentUserData.userData.tableColumes"></stock-tablevxe>
                 <!-- <stock-table :tableData="tableData" :tableColumes="tableColumes"></stock-table> -->
             </el-col>
         </el-row>
@@ -104,7 +104,7 @@
 
         <!-- 設定要顯示的欄位 -->
         <table-enable-columes :tableColumes="currentUserData.userData.tableColumes" :triggerColumeSetting="triggerColumeSetting" 
-         @saveColumesShow="saveColumesShow" @closeDialog="triggerColumeSetting = false"></table-enable-columes>
+         @saveColumesShow="saveColumesShow" @resetColumeSetting="resetColumeSetting" @closeDialog="triggerColumeSetting = false"></table-enable-columes>
 
         <!-- 使用者相關 -->
         <change-user :dbInstance="dbInstance" :currentUserData="currentUserData" :userConfigTaigger="userConfigTaigger"
@@ -162,7 +162,7 @@ export default {
             userData : {
                 id : 0,
                 googleSpreadsheet : '',
-                tableColumes : DefaultTableColumes
+                tableColumes : {}
             }
         },
         getAllUser : [],
@@ -249,7 +249,6 @@ export default {
             
         },
         async sendMss(){
-            //https://docs.google.com/spreadsheets/d/
             if(this.currentUserData.userData.googleSpreadsheet.indexOf("https://docs.google.com/spreadsheets/d/") !== -1) {
                 let spreadsheetId = this.currentUserData.userData.googleSpreadsheet.split("/")[5]
                 let data = await sendMmeberSpreadsheet({spreadsheetId})
@@ -283,6 +282,22 @@ export default {
         // 存下已修改的顯示欄位
         saveColumesShow(obj) {
             this.currentUserData.userData.tableColumes = JSON.parse(JSON.stringify(obj));
+            
+            // 存在indexedDb
+            this.dbInstance.updateUserData(this.currentUserData.userData.nickname , this.currentUserData.userData);
+            setTimeout(() => {
+                location.reload();
+            },100)
+            
+        },
+
+        resetColumeSetting() {
+            this.currentUserData.userData.tableColumes = {};
+            // 存在indexedDb
+            this.dbInstance.updateUserData(this.currentUserData.userData.nickname , this.currentUserData.userData);
+            setTimeout(() => {
+                location.reload();
+            },100)
         },
         
         // 儲存使用者資料
@@ -332,21 +347,17 @@ export default {
     },
     async mounted() {
         this.GDS();
-        // if(localStorage.getItem('googleSheetUrl') !== null ) {
-        //     this.form.spreadsheed = localStorage.getItem('googleSheetUrl');
-        // }
-        // if(localStorage.getItem('tableColumes') !== null) {
-        //     this.tableColumes = JSON.parse(localStorage.getItem('tableColumes'))
-        // }
-        // 取得當前使用者資料 - 怕初始化來不及取得資料 , 延後取得
-        setTimeout(async() => {
-            let userData = await this.dbInstance.getDefaultUserData();
-            this.currentUserData.nickname = userData.nickname;
-            this.currentUserData.userData = userData;
-            if(Object.keys(this.currentUserData.userData.tableColumes).length == 0) {
+        let userData = await this.dbInstance.getDefaultUserData();
+        this.currentUserData.nickname = userData.nickname;
+        this.currentUserData.userData = userData;
+        if(Object.keys(this.currentUserData.userData.tableColumes).length == 0) {
+            this.currentUserData.userData.tableColumes = DefaultTableColumes
+        } else {
+            // 更新欄位
+            if(this.currentUserData.userData.tableColumes.SharesRatio == undefined) {
                 this.currentUserData.userData.tableColumes = DefaultTableColumes
             }
-        } , 1500); 
+        }
     }
 };
 </script>
@@ -375,6 +386,12 @@ body , html {
     background: #2ecc71;
     color : white;
 }
+
+.amethystBg {
+    background: #9b59b6 !important;
+    color : white;
+}
+
 .directorPercent {
     text-align: center;
 }
