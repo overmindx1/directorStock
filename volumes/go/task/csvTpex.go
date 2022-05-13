@@ -122,15 +122,27 @@ func ParseTpexCSV() {
 				check = ""
 			}
 			if count > 0 {
+				// 看看當天收盤價有沒有異常
+				_, err = strconv.ParseFloat(record[2], 64)
+				if err == nil {
+					stockItems.ClosePrice = record[2]
+				} else {
+					//fmt.Println("csvTpexWritePriceError", err)
+				}
 				stockItems.OpenPrice = record[4]
-				stockItems.ClosePrice = record[2]
 				stockItems.UpDown = check
 				stockItems.UpDownCount = record[3]
 				stockItems.Date = time.Now().Format("2006-01-02")
 				stockItems.StockType = "Tpex"
 				rootVar.DbConn.Save(&stockItems)
 			} else {
-
+				// 看看當天收盤價有沒有異常
+				_, err := strconv.ParseFloat(record[2], 64)
+				if err == nil {
+					record[2] = "0"
+				} else {
+					//fmt.Println("csvTpexWritePriceError", err)
+				}
 				stockInsert := ModelSocket.StockItemsNoMem{
 					StockId:     record[0],
 					StockName:   record[1],

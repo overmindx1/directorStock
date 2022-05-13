@@ -14,7 +14,7 @@
             </template>
         </vxe-column>
         <vxe-column field="StockId" title="股號" min-width="96" sortable class-name="rowClass"></vxe-column>
-        <vxe-column field="ClosePrice" title="收盤價" min-width="96" class-name="rowClass"></vxe-column>
+        <vxe-column field="ClosePrice" title="現價" min-width="96" class-name="rowClass"></vxe-column>
         <!-- 我的資料 -->
         <template v-for="(column , key) in tableColumeSetting">
             <vxe-column 

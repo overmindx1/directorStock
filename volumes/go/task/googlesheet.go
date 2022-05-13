@@ -42,7 +42,7 @@ func GetDirectorStockSelection() {
 	if err != nil {
 		fmt.Println("Unable to retrieve data from sheet: ", err)
 	}
-	log.Print("開始抓取會長存股彙整表資料")
+	log.Print("開始抓取會長存股彙整表資料Start")
 	if len(resp.Values) == 0 {
 		fmt.Println("No data found.")
 	} else {
@@ -82,4 +82,5 @@ func GetDirectorStockSelection() {
 			}
 		}
 	}
+	log.Print("開始抓取會長存股彙整表資料 End!")
 }

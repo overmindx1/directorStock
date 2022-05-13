@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -90,14 +91,27 @@ func ParseCSV() {
 			// 數量
 			stockResult.Count(&count)
 			if count > 0 {
+				// 看看當天收盤價有沒有異常
+				_, err = strconv.ParseFloat(record[8], 64)
+				if err == nil {
+					stockItems.ClosePrice = record[8]
+				} else {
+					//fmt.Println("csvTwseWritePriceError", err)
+				}
 				stockItems.OpenPrice = record[5]
-				stockItems.ClosePrice = record[8]
 				stockItems.UpDown = record[9]
 				stockItems.UpDownCount = record[10]
 				stockItems.Date = time.Now().Format("2006-01-02")
 				stockItems.StockType = "Twse"
 				rootVar.DbConn.Save(&stockItems)
 			} else {
+				// 看看當天收盤價有沒有異常
+				_, err := strconv.ParseFloat(record[8], 64)
+				if err == nil {
+					record[8] = "0"
+				} else {
+					//fmt.Println("csvTwseWritePriceError", err)
+				}
 				stockInsert := ModelSocket.StockItemsNoMem{
 					StockId:     record[0],
 					StockName:   record[1],
