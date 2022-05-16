@@ -55,7 +55,7 @@ func RealTimeStockWrite() {
 	// 如果清除失敗
 	_, err = srv.Spreadsheets.Values.BatchClear(spreadsheetId, rb).Context(ctx).Do()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	// 可以自訂 , 不會讓全部寫入都是字串
 	valueInputOption := "USER_ENTERED"
@@ -87,7 +87,7 @@ func RealTimeStockWrite() {
 	// 執行
 	_, err = srv.Spreadsheets.Values.BatchUpdate(spreadsheetId, batcRequest).Context(ctx).Do()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	fmt.Println("會長股及時股價寫入完成!!! Done.")

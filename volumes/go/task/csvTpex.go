@@ -51,116 +51,117 @@ func ParseTpexCSV() {
 	}
 	defer resp.Body.Close()
 
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		fmt.Println("write file error", err)
-	}
-
-	file, err := os.Open(fileName)
-
-	if err != nil {
-		fmt.Println("failed to open")
-
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	//line by line
-	scanner.Split(bufio.ScanLines)
-	// var texts []string //slice
-	isStart := false
-	i := 0
-	for scanner.Scan() {
-		// text := append(text, scanner.Text())
-
-		bytes := []byte(scanner.Text())
-		//big5 => utf8
-		bytes, err := decodeBig5(bytes)
+	if resp != nil {
+		_, err = io.Copy(out, resp.Body)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("write file error", err)
 		}
 
-		isFound := strings.Index(string(bytes), "代號")
-		if isFound != -1 {
-			isStart = true
-		}
+		file, err := os.Open(fileName)
 
-		// 跑到最後找關鍵
-		isFound = strings.Index(string(bytes), "管理股票")
-		if isFound != -1 {
-			isStart = false
-		}
+		if err != nil {
+			fmt.Println("failed to open")
 
-		if isStart && i > 1 {
-			var stockItems ModelSocket.StockItemsNoMem
-			var count int64
-			csvReader := csv.NewReader(strings.NewReader(strings.Replace(string(bytes), "=", "", -1)))
-			//fmt.Println(strings.Replace(string(bytes), "=", "", -1))
-			record, err := csvReader.Read()
+		}
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
+		//line by line
+		scanner.Split(bufio.ScanLines)
+		// var texts []string //slice
+		isStart := false
+		i := 0
+		for scanner.Scan() {
+			// text := append(text, scanner.Text())
+
+			bytes := []byte(scanner.Text())
+			//big5 => utf8
+			bytes, err := decodeBig5(bytes)
 			if err != nil {
 				fmt.Println(err)
 			}
 
-			// 此行沒資料
-			if len(record) < 10 {
-				continue
+			isFound := strings.Index(string(bytes), "代號")
+			if isFound != -1 {
+				isStart = true
 			}
 
-			// 找出有沒有股票代號  有的畫拉出修改 沒有的就新增
-			stockResult := rootVar.DbConn.Where("stock_id = ?", record[0]).Limit(1).Find(&stockItems)
-			// 數量
-			stockResult.Count(&count)
-
-			var check string
-			if strings.Index(record[3], "+") != -1 {
-				check = "+"
-				strings.Replace(record[3], "+", "", -1)
-			} else if strings.Index(record[3], "-") != -1 {
-				check = "-"
-				strings.Replace(record[3], "-", "", -1)
-			} else {
-				check = ""
+			// 跑到最後找關鍵
+			isFound = strings.Index(string(bytes), "管理股票")
+			if isFound != -1 {
+				isStart = false
 			}
-			if count > 0 {
-				// 看看當天收盤價有沒有異常
-				_, err = strconv.ParseFloat(record[2], 64)
-				if err == nil {
-					stockItems.ClosePrice = record[2]
+
+			if isStart && i > 1 {
+				var stockItems ModelSocket.StockItemsNoMem
+				var count int64
+				csvReader := csv.NewReader(strings.NewReader(strings.Replace(string(bytes), "=", "", -1)))
+				//fmt.Println(strings.Replace(string(bytes), "=", "", -1))
+				record, err := csvReader.Read()
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				// 此行沒資料
+				if len(record) < 10 {
+					continue
+				}
+
+				// 找出有沒有股票代號  有的畫拉出修改 沒有的就新增
+				stockResult := rootVar.DbConn.Where("stock_id = ?", record[0]).Limit(1).Find(&stockItems)
+				// 數量
+				stockResult.Count(&count)
+
+				var check string
+				if strings.Index(record[3], "+") != -1 {
+					check = "+"
+					strings.Replace(record[3], "+", "", -1)
+				} else if strings.Index(record[3], "-") != -1 {
+					check = "-"
+					strings.Replace(record[3], "-", "", -1)
 				} else {
-					//fmt.Println("csvTpexWritePriceError", err)
+					check = ""
 				}
-				stockItems.OpenPrice = record[4]
-				stockItems.UpDown = check
-				stockItems.UpDownCount = record[3]
-				stockItems.Date = time.Now().Format("2006-01-02")
-				stockItems.StockType = "Tpex"
-				rootVar.DbConn.Save(&stockItems)
-			} else {
-				// 看看當天收盤價有沒有異常
-				_, err := strconv.ParseFloat(record[2], 64)
-				if err == nil {
-					record[2] = "0"
+				if count > 0 {
+					// 看看當天收盤價有沒有異常
+					_, err = strconv.ParseFloat(record[2], 64)
+					if err == nil {
+						stockItems.ClosePrice = record[2]
+					} else {
+						//fmt.Println("csvTpexWritePriceError", err)
+					}
+					stockItems.OpenPrice = record[4]
+					stockItems.UpDown = check
+					stockItems.UpDownCount = record[3]
+					stockItems.Date = time.Now().Format("2006-01-02")
+					stockItems.StockType = "Tpex"
+					rootVar.DbConn.Save(&stockItems)
 				} else {
-					//fmt.Println("csvTpexWritePriceError", err)
+					// 看看當天收盤價有沒有異常
+					_, err := strconv.ParseFloat(record[2], 64)
+					if err == nil {
+						record[2] = "0"
+					} else {
+						//fmt.Println("csvTpexWritePriceError", err)
+					}
+					stockInsert := ModelSocket.StockItemsNoMem{
+						StockId:     record[0],
+						StockName:   record[1],
+						StockType:   "Tpex",
+						OpenPrice:   record[4],
+						ClosePrice:  record[2],
+						UpDown:      check,
+						UpDownCount: record[3],
+						Date:        date,
+					}
+					rootVar.DbConn.Create(&stockInsert)
 				}
-				stockInsert := ModelSocket.StockItemsNoMem{
-					StockId:     record[0],
-					StockName:   record[1],
-					StockType:   "Tpex",
-					OpenPrice:   record[4],
-					ClosePrice:  record[2],
-					UpDown:      check,
-					UpDownCount: record[3],
-					Date:        date,
-				}
-				rootVar.DbConn.Create(&stockInsert)
 			}
 
-		}
-
-		// 證券代號的下一行開始
-		if isStart {
-			i++
+			// 證券代號的下一行開始
+			if isStart {
+				i++
+			}
 		}
 	}
 }

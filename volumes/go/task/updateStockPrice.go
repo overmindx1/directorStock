@@ -38,10 +38,10 @@ func RealTimeStockPrice() {
 	readRange := "RealTime!A1:D"
 
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
+	log.Print("開始抓取及時股價 Start")
 	if err != nil {
 		fmt.Println("Unable to retrieve data from sheet: ", err)
 	}
-	log.Print("開始抓取及時股價 Start")
 
 	if resp != nil {
 		if len(resp.Values) == 0 {

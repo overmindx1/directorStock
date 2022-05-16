@@ -43,42 +43,44 @@ func GetDirectorStockSelection() {
 		fmt.Println("Unable to retrieve data from sheet: ", err)
 	}
 	log.Print("開始抓取會長存股彙整表資料Start")
-	if len(resp.Values) == 0 {
-		fmt.Println("No data found.")
-	} else {
-		var directorSelection Models.DirectorSelection
-		// 先全部當成沒有在會長的選股狀態
-		rootVar.DbConn.Session(&gorm.Session{AllowGlobalUpdate: true}).Model(&directorSelection).Update("on_list", 0)
+	if resp != nil {
+		if len(resp.Values) == 0 {
+			fmt.Println("No data found.")
+		} else {
+			var directorSelection Models.DirectorSelection
+			// 先全部當成沒有在會長的選股狀態
+			rootVar.DbConn.Session(&gorm.Session{AllowGlobalUpdate: true}).Model(&directorSelection).Update("on_list", 0)
 
-		for _, row := range resp.Values {
-			// Print columns A and E, which correspond to indices 0 and 4.
-			//fmt.Printf("%s, %s\n", row[0], row[4])
-			//將 interface 的資料都轉成 string
-			rowSlice := make([]string, 0)
-			for _, str := range row {
-				rowSlice = append(rowSlice, str.(string))
-			}
-
-			var selection Models.DirectorSelection
-			var count int64
-			// row9  = 股票id
-			stockResult := rootVar.DbConn.Where("stock_id = ?", row[9]).Limit(1).Find(&selection)
-			stockResult.Count(&count)
-			// 有找到會長存股
-			if count > 0 {
-				selection.Shares = rowSlice[3]
-				selection.AvgCost = rowSlice[7]
-				selection.OnList = 1
-				rootVar.DbConn.Save(&selection)
-			} else {
-				selectionInsert := Models.DirectorSelection{
-					StockId:   rowSlice[9],
-					StockName: rowSlice[1],
-					AvgCost:   rowSlice[7],
-					Shares:    rowSlice[3],
-					OnList:    1,
+			for _, row := range resp.Values {
+				// Print columns A and E, which correspond to indices 0 and 4.
+				//fmt.Printf("%s, %s\n", row[0], row[4])
+				//將 interface 的資料都轉成 string
+				rowSlice := make([]string, 0)
+				for _, str := range row {
+					rowSlice = append(rowSlice, str.(string))
 				}
-				rootVar.DbConn.Create(&selectionInsert)
+
+				var selection Models.DirectorSelection
+				var count int64
+				// row9  = 股票id
+				stockResult := rootVar.DbConn.Where("stock_id = ?", row[9]).Limit(1).Find(&selection)
+				stockResult.Count(&count)
+				// 有找到會長存股
+				if count > 0 {
+					selection.Shares = rowSlice[3]
+					selection.AvgCost = rowSlice[7]
+					selection.OnList = 1
+					rootVar.DbConn.Save(&selection)
+				} else {
+					selectionInsert := Models.DirectorSelection{
+						StockId:   rowSlice[9],
+						StockName: rowSlice[1],
+						AvgCost:   rowSlice[7],
+						Shares:    rowSlice[3],
+						OnList:    1,
+					}
+					rootVar.DbConn.Create(&selectionInsert)
+				}
 			}
 		}
 	}

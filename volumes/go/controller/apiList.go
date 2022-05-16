@@ -111,111 +111,123 @@ func GetMemberSpreadsheetCompare(c *gin.Context) {
 		panic("Unable to retrieve data from sheet " + spreadsheetId)
 	}
 
-	if len(resp.Values) == 0 {
-		fmt.Println("No data found.")
-	} else {
-		//先排好陣列 ...
-		memberRowData := make(map[string][]models.MemberData, 0)
-		sIds := make([]string, 0)
-		for _, item := range resp.Values {
-			if len(item) > 5 {
-				sId := item[0].(string)
-				if memberRowData[sId] != nil {
-					var rowData models.MemberData
-					rowData.MemStockId = item[0].(string)
-					rowData.MemStockName = item[1].(string)
-					rowData.MemShares = item[2].(string)
-					rowData.MemAvgCost = item[3].(string)
-					rowData.MemFeeDiscount = item[4].(string)
-					rowData.MemLowestFee = item[5].(string)
-					memberRowData[sId] = append(memberRowData[sId], rowData)
-				} else {
-					var rowData models.MemberData
-					rowData.MemStockId = item[0].(string)
-					rowData.MemStockName = item[1].(string)
-					rowData.MemShares = item[2].(string)
-					rowData.MemAvgCost = item[3].(string)
-					rowData.MemFeeDiscount = item[4].(string)
-					rowData.MemLowestFee = item[5].(string)
-					memberRowData[sId] = make([]models.MemberData, 0)
-					memberRowData[sId] = append(memberRowData[sId], rowData)
-					sIds = append(sIds, sId)
-				}
-			}
-		}
-		//算平均值
-		for i, mapArr := range memberRowData {
-			// 如果同一個股票有一筆以上 則來算平均值
-			count := len(mapArr)
-			if count > 1 {
-				shares := 0
-				avgCosts := float64(0)
-				cost := float64(0)
-				for _, row := range mapArr {
-					share, _ := strconv.Atoi(row.MemShares)
-					shares = shares + share
-					avgCost, _ := strconv.ParseFloat(row.MemAvgCost, 64)
-					cost += float64(share) * avgCost
-					// fmt.Println(avgCost, shares)
-				}
-				//平均成本價
-				avgCosts = cost / float64(shares)
-				var newRow models.MemberData
-				newRow.MemStockId = memberRowData[i][0].MemStockId
-				newRow.MemStockName = memberRowData[i][0].MemStockName
-				newRow.MemShares = strconv.Itoa(shares)
-				newRow.MemAvgCost = fmt.Sprintf("%.2f", avgCosts)
-				newRow.MemFeeDiscount = memberRowData[i][0].MemFeeDiscount
-				newRow.MemLowestFee = memberRowData[i][0].MemLowestFee
-				memberRowData[i] = make([]models.MemberData, 0)
-				memberRowData[i] = append(memberRowData[i], newRow)
-			}
-		}
-
-		// 先找出所有的會長股列表
-		var results []map[string]interface{}
-		if err := rootVar.DbConn.Table("director_selection").Select("stock_id").Where("on_list = ?", 1).Find(&results).Error; err != nil {
-			log.Println(err)
-			c.JSON(500, gin.H{
-				"code": 500,
-				"msg":  "Api GetDirectorSelection Error",
-			})
-			panic("Api GetDirectorSelection Error(取得會長選股錯誤)")
-		}
-		//  找出所有要抓取的股票列表
-		for _, row := range results {
-			bools := containsString(sIds, row["stock_id"].(string))
-			if !bools {
-				sIds = append(sIds, row["stock_id"].(string))
-			}
-		}
-
-		// 開始找出股票資料
-		var stockItems []models.StockItems
-		if err := rootVar.DbConn.Preload("DirectorSelection").Where("stock_id in ?", sIds).Find(&stockItems).Error; err != nil {
-			log.Println(err)
-			c.JSON(500, gin.H{
-				"code": 500,
-				"msg":  "Api GetDirectorSelection Error",
-			})
-			panic("Api GetDirectorSelection Error(取得股票資訊錯誤)")
-		}
-
-		// 會長股加上自己的股票所有整合在一起
-		for i, stockItem := range stockItems {
-			if memberRowData[stockItem.StockId] != nil {
-				stockItem.MemberData = &memberRowData[stockItem.StockId][0]
-				stockItems[i] = stockItem
-			}
-		}
-
-		dataJson := make(map[string]interface{})
-		dataJson["list"] = stockItems
-		c.JSON(200, gin.H{
-			"code": 0,
-			"msg":  "",
-			"data": stockItems,
+	if resp == nil {
+		c.JSON(500, gin.H{
+			"code": 500,
+			"msg":  "取回資料有誤請再重試!",
 		})
+		panic("Unable to retrieve data from sheet " + spreadsheetId)
+	} else {
+		if len(resp.Values) != 0 {
+			//先排好陣列 ...
+			memberRowData := make(map[string][]models.MemberData, 0)
+			sIds := make([]string, 0)
+			for _, item := range resp.Values {
+				if len(item) > 5 {
+					sId := item[0].(string)
+					if memberRowData[sId] != nil {
+						var rowData models.MemberData
+						rowData.MemStockId = item[0].(string)
+						rowData.MemStockName = item[1].(string)
+						rowData.MemShares = item[2].(string)
+						rowData.MemAvgCost = item[3].(string)
+						rowData.MemFeeDiscount = item[4].(string)
+						rowData.MemLowestFee = item[5].(string)
+						memberRowData[sId] = append(memberRowData[sId], rowData)
+					} else {
+						var rowData models.MemberData
+						rowData.MemStockId = item[0].(string)
+						rowData.MemStockName = item[1].(string)
+						rowData.MemShares = item[2].(string)
+						rowData.MemAvgCost = item[3].(string)
+						rowData.MemFeeDiscount = item[4].(string)
+						rowData.MemLowestFee = item[5].(string)
+						memberRowData[sId] = make([]models.MemberData, 0)
+						memberRowData[sId] = append(memberRowData[sId], rowData)
+						sIds = append(sIds, sId)
+					}
+				}
+			}
+			//算平均值
+			for i, mapArr := range memberRowData {
+				// 如果同一個股票有一筆以上 則來算平均值
+				count := len(mapArr)
+				if count > 1 {
+					shares := 0
+					avgCosts := float64(0)
+					cost := float64(0)
+					for _, row := range mapArr {
+						share, _ := strconv.Atoi(row.MemShares)
+						shares = shares + share
+						avgCost, _ := strconv.ParseFloat(row.MemAvgCost, 64)
+						cost += float64(share) * avgCost
+						// fmt.Println(avgCost, shares)
+					}
+					//平均成本價
+					avgCosts = cost / float64(shares)
+					var newRow models.MemberData
+					newRow.MemStockId = memberRowData[i][0].MemStockId
+					newRow.MemStockName = memberRowData[i][0].MemStockName
+					newRow.MemShares = strconv.Itoa(shares)
+					newRow.MemAvgCost = fmt.Sprintf("%.2f", avgCosts)
+					newRow.MemFeeDiscount = memberRowData[i][0].MemFeeDiscount
+					newRow.MemLowestFee = memberRowData[i][0].MemLowestFee
+					memberRowData[i] = make([]models.MemberData, 0)
+					memberRowData[i] = append(memberRowData[i], newRow)
+				}
+			}
+
+			// 先找出所有的會長股列表
+			var results []map[string]interface{}
+			if err := rootVar.DbConn.Table("director_selection").Select("stock_id").Where("on_list = ?", 1).Find(&results).Error; err != nil {
+				log.Println(err)
+				c.JSON(500, gin.H{
+					"code": 500,
+					"msg":  "Api GetDirectorSelection Error",
+				})
+				panic("Api GetDirectorSelection Error(取得會長選股錯誤)")
+			}
+			//  找出所有要抓取的股票列表
+			for _, row := range results {
+				bools := containsString(sIds, row["stock_id"].(string))
+				if !bools {
+					sIds = append(sIds, row["stock_id"].(string))
+				}
+			}
+
+			// 開始找出股票資料
+			var stockItems []models.StockItems
+			if err := rootVar.DbConn.Preload("DirectorSelection").Where("stock_id in ?", sIds).Find(&stockItems).Error; err != nil {
+				log.Println(err)
+				c.JSON(500, gin.H{
+					"code": 500,
+					"msg":  "Api GetDirectorSelection Error",
+				})
+				panic("Api GetDirectorSelection Error(取得股票資訊錯誤)")
+			}
+
+			// 會長股加上自己的股票所有整合在一起
+			for i, stockItem := range stockItems {
+				if memberRowData[stockItem.StockId] != nil {
+					stockItem.MemberData = &memberRowData[stockItem.StockId][0]
+					stockItems[i] = stockItem
+				}
+			}
+
+			dataJson := make(map[string]interface{})
+			dataJson["list"] = stockItems
+			c.JSON(200, gin.H{
+				"code": 0,
+				"msg":  "",
+				"data": stockItems,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": 0,
+				"msg":  "沒找到資料",
+				"data": [0]models.StockItems{},
+			})
+		}
 	}
 
 }
