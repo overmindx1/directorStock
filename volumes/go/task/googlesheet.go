@@ -21,18 +21,21 @@ func GetDirectorStockSelection() {
 	b, err := ioutil.ReadFile("./config/director-stock-selection-13a579b578f4.json")
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
+		return
 	}
 
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.JWTConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly")
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
+		return
 	}
 	client := config.Client(oauth2.NoContext)
 
 	srv, err := sheets.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
 		fmt.Println("Unable to retrieve Sheets client: ", err)
+		return
 	}
 
 	spreadsheetId := "1uddRr--H95Texz9sEwY0z7GH7BBAZXMwlMaHUu7CIPs"
@@ -41,6 +44,7 @@ func GetDirectorStockSelection() {
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
 	if err != nil {
 		fmt.Println("Unable to retrieve data from sheet: ", err)
+		return
 	}
 	log.Print("開始抓取會長存股彙整表資料Start")
 	if resp != nil {
@@ -49,7 +53,7 @@ func GetDirectorStockSelection() {
 		} else {
 			var directorSelection Models.DirectorSelection
 			// 先全部當成沒有在會長的選股狀態
-			rootVar.DbConn.Session(&gorm.Session{AllowGlobalUpdate: true}).Model(&directorSelection).Update("on_list", 0)
+			rootVar.DbConn.Session(&gorm.Session{AllowGlobalUpdate: true}).Model(&directorSelection).Updates(Models.DirectorSelection{OnList: 0, Shares: "0"})
 
 			for _, row := range resp.Values {
 				// Print columns A and E, which correspond to indices 0 and 4.

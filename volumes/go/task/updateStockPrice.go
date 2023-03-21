@@ -20,18 +20,21 @@ func RealTimeStockPrice() {
 	b, err := ioutil.ReadFile("./config/director-stock-selection-13a579b578f4.json")
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
+		return
 	}
 
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.JWTConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly")
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
+		return
 	}
 	client := config.Client(oauth2.NoContext)
 
 	srv, err := sheets.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
 		fmt.Println("Unable to retrieve Sheets client: ", err)
+		return
 	}
 
 	spreadsheetId := "1p5xzy_-c-qgitZ1LyPzdVAKfyUIlT-FoP7sSe7XbyQ4"
@@ -41,6 +44,7 @@ func RealTimeStockPrice() {
 	log.Print("開始抓取及時股價 Start")
 	if err != nil {
 		fmt.Println("Unable to retrieve data from sheet: ", err)
+		return
 	}
 
 	if resp != nil {

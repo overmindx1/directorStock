@@ -47,7 +47,8 @@ func ParseTpexCSV() {
 	log.Print("開始抓取Tpex 的今日 股票資料集 " + rocDate)
 	resp, err := http.Get("http://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_download.php?l=zh-tw&d=" + rocDate + "&s=0,asc,0")
 	if err != nil {
-		fmt.Println("http (sqlConnect)", err)
+		fmt.Println("http (I/O Timeout)", err)
+		return
 	}
 	defer resp.Body.Close()
 

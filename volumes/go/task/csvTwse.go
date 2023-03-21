@@ -37,7 +37,8 @@ func ParseCSV() {
 	log.Print("開始抓取TWSE 的今日 股票資料集")
 	resp, err := http.Get("https://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date=" + date + "&type=ALL")
 	if err != nil {
-		fmt.Println("http (sqlConnect)", err)
+		fmt.Println("http (I/O Timeout)", err)
+		return
 	}
 	defer resp.Body.Close()
 	if resp != nil {

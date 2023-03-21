@@ -49,7 +49,7 @@
                         <li>會長股票筆數 : {{ statics.director.stockCount }}</li>
                         <li>會長投資成本 : {{ parseFloat(statics.director.totalInvestment).toFixed(2) }}</li>
                         <li>目前投資價值 : {{ parseFloat(statics.director.totalNowValue).toFixed(2) }}</li>
-                        <li>目前投資營利 : {{ parseFloat(statics.director.totalProfit).toFixed(2) }}</li>
+                        <li>尚未實現損益 : {{ parseFloat(statics.director.totalProfit).toFixed(2) }}</li>
                     </ul>
                 </div>
                 <div class="dataBlock">
@@ -58,7 +58,7 @@
                         <li>您的股票筆數 : {{ statics.member.stockCount }}</li>
                         <li>您的投資成本 : {{ parseFloat(statics.member.totalInvestment).toFixed(2) }}</li>
                         <li>目前投資價值 : {{ parseFloat(statics.member.totalNowValue).toFixed(2) }}</li>
-                        <li>目前投資營利 : {{ parseFloat(statics.member.totalProfit).toFixed(2) }} (已扣除手續費及證交稅)</li>
+                        <li>尚未實現損益 : {{ parseFloat(statics.member.totalProfit).toFixed(2) }} (已扣除手續費及證交稅)</li>
                     </ul>
                 </div>
             </el-col>

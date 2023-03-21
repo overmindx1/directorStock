@@ -19,18 +19,21 @@ func RealTimeStockWrite() {
 	b, err := ioutil.ReadFile("./config/director-stock-selection-13a579b578f4.json")
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
+		return
 	}
 
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.JWTConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly", "https://www.googleapis.com/auth/spreadsheets")
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
+		return
 	}
 	client := config.Client(oauth2.NoContext)
 
 	srv, err := sheets.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
 		fmt.Println("Unable to retrieve Sheets client: ", err)
+		return
 	}
 	// 會長股及時股票
 	spreadsheetId := "1p5xzy_-c-qgitZ1LyPzdVAKfyUIlT-FoP7sSe7XbyQ4"
@@ -56,6 +59,7 @@ func RealTimeStockWrite() {
 	_, err = srv.Spreadsheets.Values.BatchClear(spreadsheetId, rb).Context(ctx).Do()
 	if err != nil {
 		log.Println(err)
+		return
 	}
 	// 可以自訂 , 不會讓全部寫入都是字串
 	valueInputOption := "USER_ENTERED"
@@ -88,6 +92,7 @@ func RealTimeStockWrite() {
 	_, err = srv.Spreadsheets.Values.BatchUpdate(spreadsheetId, batcRequest).Context(ctx).Do()
 	if err != nil {
 		log.Println(err)
+		return
 	}
 
 	fmt.Println("會長股及時股價寫入完成!!! Done.")
