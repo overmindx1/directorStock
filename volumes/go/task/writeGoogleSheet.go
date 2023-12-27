@@ -69,12 +69,16 @@ func RealTimeStockWrite() {
 		rowWrite := make([]interface{}, 4)
 		rowWrite[0] = row["stock_id"].(string)
 		rowWrite[1] = row["stock_name"].(string)
-		if row["stock_type"].(string) == "Tpex" {
-			rowWrite[2] = "=importxml(\"https://histock.tw/stock/" + row["stock_id"].(string) + "\" , \"/html/body/form/div[4]/div[3]/div/div[1]/div[1]/div[2]/div[1]/div[2]/ul/li[1]/span/span/span\")"
-		} else {
-			rowWrite[2] = "=GOOGLEFINANCE(\"TPE:\"&" + row["stock_id"].(string) + ", \"price\")"
+		stock_type, ok := row["stock_type"].(string)
+		if ok {
+			if stock_type == "Tpex" {
+				rowWrite[2] = "=importxml(\"https://histock.tw/stock/" + row["stock_id"].(string) + "\" , \"/html/body/form/div[4]/div[3]/div/div[1]/div[1]/div[2]/div[1]/div[2]/ul/li[1]/span/span/span\")"
+			} else {
+				rowWrite[2] = "=GOOGLEFINANCE(\"TPE:\"&" + row["stock_id"].(string) + ", \"price\")"
+			}
+			rowWrite[3] = stock_type
 		}
-		rowWrite[3] = row["stock_type"].(string)
+
 		writeRows = append(writeRows, rowWrite)
 	}
 
